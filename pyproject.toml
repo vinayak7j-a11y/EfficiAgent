@@ -4,14 +4,11 @@
 name = "efficiagent"
 version = "0.1.0"
 requires-python = ">=3.9"
-dependencies = []
+dependencies = ["flask==3.0.3"]
 
 [tool.ruff]
 line-length = 100
 exclude = ["part1_token_optimization/*", "part2_debugging/*"]
 
 [tool.ruff.lint]
-# Default rule set (pycodestyle + pyflakes) is enough signal for this repo;
-# the extended rule sets (PERF, BLE, etc.) are useful in a real codebase but
-# not the focus of this exercise, so kept out of scope here deliberately.
 select = ["E", "F", "W"]
