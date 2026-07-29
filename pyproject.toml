@@ -1,8 +1,10 @@
 # Project: EfficiAgent
-# (No [project] table here on purpose: Vercel's Python builder runs
-# `uv lock` against this file, which treats [project] as real packaging
-# metadata and requires fields like `version`. This repo isn't a
-# distributable package, so we skip it entirely and rely on requirements.txt.)
+
+[project]
+name = "efficiagent"
+version = "0.1.0"
+requires-python = ">=3.9"
+dependencies = []
 
 [tool.ruff]
 line-length = 100
