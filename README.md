@@ -1,4 +1,7 @@
 # EfficiAgent — Cost, Debugging, Deployment
+## Video Walkthrough
+
+Watch here: https://www.loom.com/share/d407842e8b554270aa37f4ce0baeb814
 
 This repo covers all three parts of the assignment. Each part has its own
 detailed doc; this README is the map + the "why."
