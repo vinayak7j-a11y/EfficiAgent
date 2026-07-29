@@ -1,0 +1,73 @@
+name: CI/CD
+
+on:
+  push:
+    branches: ["**"]        # lint+test on every push, every branch
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+  id-token: write            # needed only if using OIDC to cloud provider (see README)
+
+jobs:
+  lint-and-test:
+    name: Lint & Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Lint (ruff)
+        run: ruff check .
+
+      - name: Test (pytest)
+        run: pytest -v --maxfail=1
+
+  deploy-staging:
+    name: Deploy to Staging
+    needs: lint-and-test
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    environment:
+      name: staging
+      url: ${{ steps.deploy.outputs.staging_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Deploy to staging
+        id: deploy
+        env:
+          # Secret is injected from GitHub Encrypted Secrets / the
+          # "staging" Environment's own secret store -- never hardcoded,
+          # never printed. See README.md "Secrets handling".
+          STAGING_DEPLOY_TOKEN: ${{ secrets.STAGING_DEPLOY_TOKEN }}
+        run: |
+          echo "Deploying to staging environment..."
+          # Real deploy command goes here, e.g.:
+          #   flyctl deploy --app myapp-staging --remote-only
+          #   or: aws ecs update-service --cluster staging --service myapp --force-new-deployment
+          #   or: railway up --environment staging
+          # Kept generic here since the target platform wasn't specified.
+          echo "staging_url=https://staging.example.com" >> "$GITHUB_OUTPUT"
+
+      - name: Post-deploy smoke test
+        run: |
+          # Hit the health endpoint on the just-deployed staging env before
+          # calling this "done". A deploy that "succeeds" but serves 500s
+          # on /health should fail the job, not go green.
+          curl -f https://staging.example.com/health || exit 1
